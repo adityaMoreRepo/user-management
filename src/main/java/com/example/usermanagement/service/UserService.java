@@ -1,6 +1,7 @@
 package com.example.usermanagement.service;
 
 import com.example.usermanagement.DTO.UserDto;
+import com.example.usermanagement.entity.Address;
 import com.example.usermanagement.entity.User;
 import com.example.usermanagement.exception.UserNotFoundException;
 import com.example.usermanagement.repository.UserRepository;
@@ -11,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -59,17 +63,6 @@ public class UserService {
         return dtoPage;
     }
 
-    private UserDto convertEntityToDto(User user) {
-        log.info("Inside convertEntityToDto method of UserService class.");
-        UserDto userDto = new UserDto();
-        userDto.setUserId(user.getUserId());
-        userDto.setEmailId(user.getEmailId());
-        userDto.setFirstName(user.getFirstName());
-        userDto.setLastName(user.getLastName());
-        userDto.setMobileNo(user.getMobileNo());
-        userDto.setAddresses(user.getAddresses());
-        return userDto;
-    }
 
     public ResponseEntity<UserDto> removeUser(int id) {
         log.info("Inside removeUser method of UserService class.");
@@ -91,4 +84,29 @@ public class UserService {
         });
         return convertEntityToDto(userOptional.get());
     }
+
+    public UserDto addAddressToUser(int id, Address address) {
+        log.info("Inside addAddressToUser method of UserService.");
+        Optional<User> optionalUser = repo.findById(id);
+        optionalUser.ifPresent(user -> {
+            List<Address> addresses = user.getAddresses();
+            addresses.add(address);
+            user.setAddresses(addresses);
+            repo.save(user);
+        });
+        return convertEntityToDto(optionalUser.get());
+    }
+
+    private UserDto convertEntityToDto(User user) {
+        log.info("Inside convertEntityToDto method of UserService class.");
+        UserDto userDto = new UserDto();
+        userDto.setUserId(user.getUserId());
+        userDto.setEmailId(user.getEmailId());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
+        userDto.setMobileNo(user.getMobileNo());
+        userDto.setAddresses(user.getAddresses());
+        return userDto;
+    }
+
 }

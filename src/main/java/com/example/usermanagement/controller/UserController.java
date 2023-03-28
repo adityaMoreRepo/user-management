@@ -1,6 +1,7 @@
 package com.example.usermanagement.controller;
 
 import com.example.usermanagement.DTO.UserDto;
+import com.example.usermanagement.entity.Address;
 import com.example.usermanagement.entity.User;
 import com.example.usermanagement.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -63,5 +64,13 @@ public class UserController {
         log.info("Inside updateUser method of UserController class.");
         return service.updateUser(id, user);
     }
+
+    // == Create Address ==
+    @PatchMapping("/addAddress/{id}")
+    public UserDto addAddressToUse(@PathVariable int id, @RequestBody Address address) {
+        log.info("Inside addAddressToUser method of UserController class.");
+        return service.addAddressToUser(id, address);
+    }
+
 
 }
