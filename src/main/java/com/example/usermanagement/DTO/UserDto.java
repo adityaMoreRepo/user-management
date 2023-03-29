@@ -13,6 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 public class UserDto {
     private int userId;
+
+    private String userName;
+    private Boolean active;
+    private String roles;
     private String emailId;
     private String firstName;
     private String lastName;

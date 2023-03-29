@@ -15,8 +15,11 @@ import java.util.List;
 @Builder
 @Table(
         name = "users",
-        uniqueConstraints = @UniqueConstraint(name = "unique_mobile_no",
-                columnNames = "mobileNo")
+        uniqueConstraints = {
+                @UniqueConstraint(name = "unique_mobile_no",
+                columnNames = "mobileNo"),
+                @UniqueConstraint(name = "unique_user_name", columnNames = "userName")}
+
 )
 public class User {
     @Id
@@ -25,6 +28,17 @@ public class User {
     )
     private int userId;
 
+    @Column(
+            nullable = false
+    )
+    private String userName;
+
+    @Column(
+            nullable = false
+    )
+    private String password;
+    private Boolean active;
+    private String roles;//ROLE_USER,ROLE_ADMIN etc.
     @Column(
             nullable = false
     )

@@ -1,6 +1,6 @@
 
-INSERT INTO `users` VALUES(1, 'vikas@gmail.com', 'Vikas', 'Karma', 9468305680);
-INSERT INTO `users` VALUES(2, 'neha@gmail.com', 'Neha', 'Sharma', 8058302010);
+INSERT INTO `users` VALUES(1, 'vikas123', 'vikas@123', 1, 'ROLE_USER', 'vikas@gmail.com', 'Vikas', 'Karma', 9468305680);
+INSERT INTO `users` VALUES(2, 'neha123', 'neha@123', 1, 'ROLE_USER', 'neha@gmail.com', 'Neha', 'Sharma', 8058302010);
 
 INSERT INTO `address` VALUES(1, 'Permanent', 101, 'Main road', 'Vakad', 'Pune', 'Maharashtra', 'India', '134110', 1);
 INSERT INTO `address` VALUES(2, 'Temporary', 204, 'Gandhi road', 'Vadgoan', 'Pune', 'Maharashtra', 'India', '411023', 1);
