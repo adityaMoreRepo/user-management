@@ -117,7 +117,7 @@ public class UserController {
         StatefulBeanToCsv<UserDto> writer =
                 new StatefulBeanToCsvBuilder<UserDto>
                         (response.getWriter())
-                        .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
+                        .withQuotechar(CSVWriter.DEFAULT_QUOTE_CHARACTER)
                         .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
                         .withOrderedResults(false).build();
 
