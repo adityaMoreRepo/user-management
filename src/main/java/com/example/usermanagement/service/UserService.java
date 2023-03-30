@@ -177,4 +177,12 @@ public class UserService {
         }
         return "Old password did not match.";
     }
+
+    public List<UserDto> findAll() {
+        log.info("Inside findAll method of UserService class.");
+        return repo.findAll()
+                .stream()
+                .map(this::convertEntityToDto)
+                .collect(Collectors.toList());
+    }
 }

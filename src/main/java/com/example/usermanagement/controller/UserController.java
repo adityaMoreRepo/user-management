@@ -4,17 +4,22 @@ import com.example.usermanagement.DTO.UserDto;
 import com.example.usermanagement.entity.Address;
 import com.example.usermanagement.entity.User;
 import com.example.usermanagement.service.UserService;
+import com.opencsv.CSVWriter;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
 import java.util.Optional;
 
@@ -96,5 +101,27 @@ public class UserController {
         return service.updateCredentials(password, oldPassword, principal);
     }
 
-    //Todo : Admin should be able to download users data in csv Format
+    // == Export CSV File ==
+    @GetMapping("/downloadCSV")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public void exportCSV(HttpServletResponse response) throws Exception {
+        log.info("Inside exportCSV method of UserController class.");
+        // set file name and content type
+        String filename = "User-List.csv";
+
+        response.setContentType("text/csv");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + filename + "\"");
+
+        // create a csv writer
+        StatefulBeanToCsv<UserDto> writer =
+                new StatefulBeanToCsvBuilder<UserDto>
+                        (response.getWriter())
+                        .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER)
+                        .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
+                        .withOrderedResults(false).build();
+
+        // write all employees to csv file
+        writer.write(service.findAll());
+    }
 }

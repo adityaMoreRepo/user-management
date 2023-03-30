@@ -28,6 +28,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
+        /*
+        CSRF stands for Cross-Site Request Forgery.
+        It is an attack that forces an end user to execute
+        unwanted actions on a web application in which they are
+        currently authenticated.
+         */
         //Allow permission for all the user roles for registration but for other apis enable authorization.
         http.authorizeRequests()
                 .antMatchers("/v1/user/registration")
