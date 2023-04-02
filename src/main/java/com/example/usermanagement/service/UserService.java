@@ -22,14 +22,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
-    @Autowired
+
     private UserRepository repo;
 
-    @Autowired
+
     private BCryptPasswordEncoder passwordEncoder;
 
 
     // == Constructors ==
+    @Autowired
     public UserService(UserRepository repo, BCryptPasswordEncoder passwordEncoder) {
         this.repo = repo;
         this.passwordEncoder = passwordEncoder;
@@ -37,6 +38,7 @@ public class UserService {
 
     public UserService() {
     }
+
 
 
     //== Service Methods ==
@@ -52,7 +54,7 @@ public class UserService {
     //If logged-in user is ADMIN then he can give access to -> MODERATOR OR ADMIN
     //If logged-in user is MODERATOR  then he can give access to -> MODERATOR
     public String giveAccessToUser(int id, String userRole, Principal principal) {
-        log.info("Inside giveAccessToUser method of UserController");
+        log.info("Inside giveAccessToUser method of UserService class.");
         User user = repo.findById(id).get();
         List<String> activeRoles = getRolesByLoggedInUser(principal);
         //Check if userRole is Available
@@ -94,11 +96,8 @@ public class UserService {
     public UserDto getUserById(int id) {
         log.info("Inside getUserById method of UserService class.");
         Optional<User> opt = repo.findById(id);
-//        Assert.notNull(opt, "User ID " + id + " is not Correct.");
-        if (opt.get() == null) {
-            throw new UserNotFoundException("The User ID " + id + " not found.");
-        }
-        return convertEntityToDto(opt.get());
+        User user = opt.orElseThrow(() -> new UserNotFoundException("UserId " + id + " is not valid."));
+        return convertEntityToDto(user);
     }
 
 
@@ -114,11 +113,11 @@ public class UserService {
     }
 
 
-    public ResponseEntity<UserDto> removeUser(int id) {
+    public ResponseEntity<String> removeUser(int id) {
         log.info("Inside removeUser method of UserService class.");
         Optional<User> optionalUser = repo.findById(id);
         optionalUser.ifPresent(user -> repo.delete(user));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("The user with userID " + id + " has been deleted successfully");
     }
 
     public UserDto updateUser(int id, User user) {

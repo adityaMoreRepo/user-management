@@ -16,9 +16,9 @@ import java.util.List;
 @Table(
         name = "users",
         uniqueConstraints = {
-                @UniqueConstraint(name = "unique_mobile_no",
-                columnNames = "mobileNo"),
-                @UniqueConstraint(name = "unique_user_name", columnNames = "userName")}
+                @UniqueConstraint(name = "unique_mobile_no", columnNames = "mobileNo"),
+                @UniqueConstraint(name = "unique_user_name", columnNames = "userName"),
+                @UniqueConstraint(name = "unique_email_id", columnNames = "emailId")}
 
 )
 public class User {

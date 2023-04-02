@@ -70,7 +70,7 @@ public class UserController {
 
     @DeleteMapping("/removeUser/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<UserDto> removeUser(@PathVariable int id){
+    public ResponseEntity<String> removeUser(@PathVariable int id){
         log.info("Inside removeUser method of UserController class.");
         return service.removeUser(id);
     }
