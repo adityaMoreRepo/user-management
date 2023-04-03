@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.nio.file.attribute.UserPrincipal;
@@ -33,8 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 
 /*
@@ -200,9 +200,10 @@ class UserServiceTest {
         String userRole = "ROLE_ADMIN";
         String received = service.giveAccessToUser(fetchedUser.getUserId(), userRole, principal);
         //then
-        String expected = "Hi, " + principal.getName() + " you don't have permission to assign "+ userRole;
+        String expected = "Hi, " + principal.getName() + " you don't have permission to assign " + userRole;
         assertThat(expected).isEqualTo(received);
     }
+
     @Test
     @DisplayName("Unit test for getting user by User ID")
     void givenUserId_whenGetUserById_thenReturnUserDto() {
@@ -283,17 +284,25 @@ class UserServiceTest {
     @Test
     @DisplayName("Remove User By User ID")
     void givenUserID_whenFindByIDDeleteBYID_thenReturnMessage() {
-        //given
+        //given User ID
         given(repo.findById(1))
                 .willReturn(Optional.of(user));
         //capture User Argument to verify, as it is a void method
         ArgumentCaptor<User> valueCapture = ArgumentCaptor.forClass(User.class);
         doNothing().when(repo).delete(valueCapture.capture());
+
         //when
-        service.removeUser(1);
+        ResponseEntity<String> stringResponseEntity = service.removeUser(1);
+
         //then
-        verify(repo).delete(valueCapture.getValue());
+        String expected = "The user with userID " + user.getUserId() + " has been deleted successfully";
+        //Verify that how many times repo.delete() was accessed
+        verify(repo, times(1)).delete(user);
+        //Check for captured value
         assertEquals(user, valueCapture.getValue());
+        //check return message
+        assertEquals(expected, stringResponseEntity.getBody());
+
     }
 
     @Test
@@ -349,13 +358,68 @@ class UserServiceTest {
     }
 
     @Test
-    void updateCredentials() {
+    @DisplayName("Update Password credentials for logged in User")
+    void givenPrincipal_whenUpdateCredentials_thenReturnResult() {
         //given
+        // Logged-in user or Principal
+        User loggedInUser = User.builder()
+                .userId(2)
+                .userName("adi")
+                .password("$2a$12$gajkO9rXT8quBfxeMasCTu0jRx//3.Ke.95bbUkwzz.D.EM7XyBDa")//pwd: adi@123
+                .roles("ROLE_ADMIN")
+                .active(true)
+                .emailId("adi@gmail.com")
+                .firstName("Adi")
+                .lastName("More")
+                .mobileNo("9035394930")
+                .build();
+        //Create a dummy Principal
+        Principal principal = (UserPrincipal) () -> "adi";
+        // Get Logged in User
+        given(repo.findByUserName(principal.getName()))
+                .willReturn(Optional.of(loggedInUser));
+        //Encoder match method
+        given(encoder.matches("adi@123", loggedInUser.getPassword()))
+                .willReturn(true);
+        String expectedMessage = "You have successfully changed the password";
         //when
+        String message = service.updateCredentials("newPassword", "adi@123", principal);
         //then
+        assertEquals(message, expectedMessage);
     }
 
     @Test
-    void findAll() {
+    @DisplayName("Find the List of Users")
+    void findAllTest() {
+        //given
+        User user1 = User.builder()
+                .userId(1)
+                .userName("user1")
+                .password("adi@123")
+                .active(true)
+                .emailId("adi@gmail.com")
+                .firstName("Adi")
+                .lastName("More")
+                .mobileNo("9035394928")
+                .build();
+        User user2 = User.builder()
+                .userId(2)
+                .userName("user2")
+                .password("adi@123")
+                .active(true)
+                .emailId("adi@gmail.com")
+                .firstName("Adi")
+                .lastName("More")
+                .mobileNo("9035394930")
+                .build();
+        List<User> userList = new ArrayList<>(Arrays.asList(user1, user2));
+        given(repo.findAll())
+                .willReturn(userList);
+        //when
+        List<UserDto> userDtoList = service.findAll();
+        //then
+        assertThat(userDtoList).isNotNull();
+        assertThat(userDtoList.size()).isEqualTo(2);
+
     }
 }
