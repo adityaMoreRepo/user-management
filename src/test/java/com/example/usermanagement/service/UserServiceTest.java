@@ -60,7 +60,7 @@ class UserServiceTest {
         //mock encoder
 //        encoder = Mockito.mock(BCryptPasswordEncoder.class);
         //Inject repository
-        service = new UserService(repo, encoder);
+//        service = new UserService(repo, encoder);
         //Create a User
         Address address = Address.builder()
                 .addressType("Permanent")
@@ -237,9 +237,8 @@ class UserServiceTest {
         //OptionalUser
         given(repo.findById(2))
                 .willReturn(Optional.empty());
-        //when
+        //when and then
         assertThrows(UserNotFoundException.class, () -> service.getUserById(2));
-        //then
 
     }
 

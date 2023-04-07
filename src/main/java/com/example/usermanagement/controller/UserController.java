@@ -38,8 +38,10 @@ public class UserController {
 
     @GetMapping("/access/{id}/{userRole}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public String giveAccessToUser(@PathVariable int id, @PathVariable String userRole, Principal principal){
-        return service.giveAccessToUser(id, userRole, principal);
+    public ResponseEntity<String> giveAccessToUser(@PathVariable int id, @PathVariable String userRole, Principal principal){
+        log.info("Inside giveAccessToUser method of UserController class.");
+        String response = service.giveAccessToUser(id, userRole, principal);
+        return ResponseEntity.ok().body(response);
     }
 
     // == Get User by ID ==
