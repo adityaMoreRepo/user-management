@@ -219,6 +219,8 @@ class UserControllerTest {
         //when
         RequestBuilder requestBuilder = delete("/v1/removeUser/1")
                 .accept(MediaType.APPLICATION_JSON);
+        //we can also create request without hardcoding
+        //delete("/v1/removeUser/{id}", user.getUserId());
         ResultActions resultActions = mockMvc.perform(requestBuilder);
 
         //then
