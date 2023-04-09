@@ -105,7 +105,8 @@ class UserControllerTest {
         //given
         //Group User Details
         GroupUserDetails groupUserDetails = new GroupUserDetails(user);
-        given(service.createUser(ArgumentMatchers.any(User.class)))
+        given(service.createUser(ArgumentMatchers.any(User.class)))//any is used because spring going to check
+                //hash of mock and that of pass through request body through json object.
                 .willReturn(userDto); //For stubbing methods we use ArgumentMatchers and ArgumentCaptors
         given(groupUserDetailsService.loadUserByUsername("adi"))
                 .willReturn(groupUserDetails);
@@ -183,7 +184,7 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "admin", authorities = {"ROLE_ADMIN"})
-    void getAllUsersByPage() throws Exception {
+    void givenPageAndSize_whenGetAllUsersByPage_thenReturnPageDto() throws Exception {
         //given
         //page request
         //No need to create pageRequest if you hydrate your Controller's pageable Object correctly by
@@ -208,7 +209,8 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "admin", authorities = {"ROLE_ADMIN"})
-    void removeUser() throws Exception {
+    @DisplayName("Remove user by userId through Admin Access")
+    void givenUserId_whenRemoveUser_thenReturnIsOk() throws Exception {
         //given
         ResponseEntity<String> response = ResponseEntity.ok().body("The user with userID " + user.getUserId() + " has been deleted successfully");
         given(service.removeUser(user.getUserId()))
@@ -226,18 +228,97 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUser() {
+    @WithMockUser(username = "adi", authorities = {"ROLE_USER"})
+    @DisplayName("Update User Details by User Access")
+    void givenUser_whenUpdateUser_thenReturnUpdatedDto() throws Exception{
+        //given
+        given(service.updateUser(user.getUserId(), user))
+                .willReturn(userDto);
+
+        //when
+        RequestBuilder requestBuilder = put("/v1/updateUser/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(user))
+                .accept(MediaType.APPLICATION_JSON);
+        ResultActions resultActions = mockMvc.perform(requestBuilder);
+
+        //then
+        resultActions
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.userName", CoreMatchers.is(userDto.getUserName())));
+
     }
 
     @Test
-    void addAddressToUse() {
+    @WithMockUser(username = "adi", authorities = {"ROLE_USER"})
+    @DisplayName("Update User Address by User access")
+    void givenAddress_whenAddAddressToUser_thenReturnUpdatedUserDTo() throws Exception {
+        //given
+        Address address = Address.builder()
+                .addressType("Permanent")
+                .houseNo(11)
+                .street("MG")
+                .city("Nashik")
+                .country("India")
+                .build();
+        given(service.addAddressToUser(1, address))
+                .willReturn(userDto);
+
+        //when
+        RequestBuilder requestBuilder = patch("/v1/addAddress/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(address))
+                .accept(MediaType.APPLICATION_JSON);
+        ResultActions resultActions = mockMvc.perform(requestBuilder);
+
+        //then
+        resultActions
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.userName", CoreMatchers.is("adi")));
     }
 
     @Test
-    void updateCredentials() {
+    @WithMockUser(username = "adi", authorities = {"ROLE_USER"})
+    @DisplayName("Update User Credentials by User access")
+    void updateCredentials() throws Exception {
+        //given
+        given(service.updateCredentials(anyString(), anyString(), any(Principal.class)))
+                .willReturn("Successful!");
+
+        //when
+        RequestBuilder requestBuilder = patch("/v1/updateCredentials?password=pwd123&oldPassword=adi@123")
+                .accept(MediaType.APPLICATION_JSON);
+        ResultActions resultActions = mockMvc.perform(requestBuilder);
+        //get results
+        MvcResult mvcResult = resultActions.andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+
+        //then
+        resultActions
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        assertEquals(contentAsString, "Successful!");
     }
 
     @Test
-    void exportCSV() {
+    @WithMockUser(username = "admin", authorities = {"ROLE_ADMIN"})
+    @DisplayName("Export User Details through Admin access")
+    void exportCSV() throws Exception {
+        //given
+        List<UserDto> userDtoList = new ArrayList<>(Arrays.asList(userDto));
+        given(service.findAll())
+                .willReturn(userDtoList);
+
+        //when
+        RequestBuilder requestBuilder = get("/v1/downloadCSV")
+                .accept(MediaType.APPLICATION_JSON);
+        ResultActions resultActions = mockMvc.perform(requestBuilder);
+
+        //then
+        resultActions
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }
